@@ -1,7 +1,7 @@
-"""FSE73768P dishwasher state machine.
+"""FSE73768P dishwasher state model.
 
-Local QuickSelect model used for the card and as a fallback. When Electrolux
-credentials are present the coordinator overwrites this from live cloud state.
+Holds the last live Electrolux state plus QuickSelect metadata for the card.
+Commands go to the real machine through the coordinator.
 """
 
 from __future__ import annotations
@@ -47,7 +47,7 @@ class ApplianceError(Exception):
 
 @dataclass
 class Appliance:
-    """Offline AEG FSE73768P."""
+    """AEG FSE73768P state used by the Electrolux coordinator."""
 
     name: str = "AEG FSE73768P"
     powered: bool = True
@@ -71,7 +71,6 @@ class Appliance:
     cycle_count: int = 0
     cycles_since_care: int = 0
     last_error: str | None = None
-    cloud: bool = False
     started_at: float | None = None
     updated_at: float = field(default_factory=time.time)
     _cycle: ResolvedCycle | None = field(default=None, repr=False)
@@ -298,7 +297,7 @@ class Appliance:
             changed = True
             if self.elapsed_seconds >= self.cycle.duration_min * 60:
                 self._complete()
-        elif self.state == STATE_IDLE and self.powered and not self.cloud:
+        elif self.state == STATE_IDLE and self.powered:
             if now - self._idle_since >= AUTO_OFF_IDLE_SECONDS:
                 self.power_off()
                 changed = True
@@ -375,8 +374,6 @@ class Appliance:
             "model": "FSE73768P",
             "pnc": "911438399",
             "series": "7000 ComfortLift",
-            "offline": not self.cloud,
-            "cloud": self.cloud,
             "powered": self.powered,
             "state": self.state,
             "program": self.program_id,

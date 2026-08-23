@@ -33,12 +33,11 @@ def test_apply_running_state() -> None:
             }
         },
     )
-    assert machine.cloud is True
     assert machine.state == STATE_RUNNING
     assert machine.phase == "main_wash"
     assert machine.program_id == "eco"
     assert machine.door_open is False
-    assert machine.snapshot()["offline"] is False
+    assert machine.snapshot()["model"] == "FSE73768P"
 
 
 def test_apply_finished_and_salt_alert() -> None:

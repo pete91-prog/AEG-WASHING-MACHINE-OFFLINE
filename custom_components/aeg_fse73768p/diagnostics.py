@@ -28,6 +28,5 @@ async def async_get_config_entry_diagnostics(
     coordinator: AEGCoordinator = hass.data[DOMAIN][entry.entry_id]
     return {
         "entry": {"title": entry.title, "data": _redact(dict(entry.data))},
-        "cloud": coordinator.is_cloud,
         "appliance": coordinator.appliance.snapshot(),
     }

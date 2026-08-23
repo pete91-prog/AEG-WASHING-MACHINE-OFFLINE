@@ -14,7 +14,6 @@ ATTRIBUTION: Final = "AEG FSE73768P via Electrolux Group API"
 PLATFORMS: Final = [
     "binary_sensor",
     "button",
-    "light",
     "number",
     "select",
     "sensor",
@@ -23,8 +22,6 @@ PLATFORMS: Final = [
 
 URL_BASE: Final = f"/{DOMAIN}"
 CARD_FILENAME: Final = "aeg-fse73768p-card.js"
-STORAGE_VERSION: Final = 1
-
 CONF_NAME: Final = "name"
 DEFAULT_NAME: Final = "AEG FSE73768P"
 CONF_API_KEY: Final = "api_key"

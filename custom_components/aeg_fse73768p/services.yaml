@@ -44,7 +44,7 @@ start_program:
 
 pause:
   name: Pause
-  description: Pause a running programme (same as opening the door).
+  description: Pause a running programme.
   fields:
     device_id:
       name: Device
@@ -71,18 +71,3 @@ cancel:
       selector:
         device:
           integration: aeg_fse73768p
-
-set_door:
-  name: Set door
-  description: Open or close the door on the local model. The real door cannot be opened remotely.
-  fields:
-    device_id:
-      name: Device
-      selector:
-        device:
-          integration: aeg_fse73768p
-    open:
-      name: Open
-      required: true
-      selector:
-        boolean:

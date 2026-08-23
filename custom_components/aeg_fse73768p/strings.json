@@ -112,14 +112,9 @@
       }
     },
     "switch": {
-      "power": { "name": "Power" },
-      "door_switch": { "name": "Door open" },
       "extra_power": { "name": "ExtraPower" },
       "glass_care": { "name": "GlassCare" },
-      "extra_silent": { "name": "ExtraSilent" },
-      "airdry": { "name": "AirDry" },
-      "end_sound": { "name": "End sound" },
-      "comfort_lift": { "name": "ComfortLift" }
+      "extra_silent": { "name": "ExtraSilent" }
     },
     "button": {
       "start": { "name": "Start" },
@@ -131,18 +126,10 @@
       "start_2h40": { "name": "Start 2h 40min" },
       "start_eco": { "name": "Start ECO" },
       "start_auto_sense": { "name": "Start AUTO Sense" },
-      "start_machine_care": { "name": "Start Machine Care" },
-      "refill_salt": { "name": "Refill salt" },
-      "refill_rinse_aid": { "name": "Refill rinse aid" },
-      "reset_machine_care": { "name": "Reset Machine Care" }
+      "start_machine_care": { "name": "Start Machine Care" }
     },
     "number": {
-      "delay_start": { "name": "Delay start" },
-      "water_softener": { "name": "Water softener" },
-      "rinse_aid_dosage": { "name": "Rinse aid dosage" }
-    },
-    "light": {
-      "interior_light": { "name": "Interior light" }
+      "delay_start": { "name": "Delay start" }
     }
   },
   "services": {
@@ -169,14 +156,6 @@
     "cancel": {
       "name": "Cancel",
       "description": "Cancel the current programme or delayed start."
-    },
-    "set_door": {
-      "name": "Set door",
-      "description": "Open or close the door on the local model. The real door cannot be opened remotely.",
-      "fields": {
-        "device_id": { "name": "Device", "description": "Target dishwasher." },
-        "open": { "name": "Open", "description": "True to open, false to close." }
-      }
     }
   }
 }

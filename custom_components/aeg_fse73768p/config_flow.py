@@ -103,6 +103,10 @@ class AEGFSE73768PConfigFlow(ConfigFlow, domain=DOMAIN):
             data_schema=vol.Schema({vol.Required(CONF_APPLIANCE_ID): vol.In(choices)}),
         )
 
+    async def async_step_reauth(self, entry_data: dict[str, Any]) -> ConfigFlowResult:
+        """Collect tokens again when the stored ones no longer work."""
+        return await self.async_step_user()
+
     async def async_step_reconfigure(
         self, user_input: dict[str, Any] | None = None
     ) -> ConfigFlowResult:
@@ -119,17 +123,20 @@ class AEGFSE73768PConfigFlow(ConfigFlow, domain=DOMAIN):
             CONF_REFRESH_TOKEN: self._refresh,
             CONF_APPLIANCE_ID: appliance["id"],
         }
-        if self.source == "reconfigure":
+        if self.source in {"reconfigure", "reauth"}:
             return self.async_update_reload_and_abort(
-                self._reconfigure_entry(),
+                self._existing_entry(),
                 title=title,
                 data=data,
             )
         self._abort_if_unique_id_configured()
         return self.async_create_entry(title=title, data=data)
 
-    def _reconfigure_entry(self):
-        getter = getattr(self, "_get_reconfigure_entry", None)
+    def _existing_entry(self):
+        name = (
+            "_get_reauth_entry" if self.source == "reauth" else "_get_reconfigure_entry"
+        )
+        getter = getattr(self, name, None)
         if getter:
             return getter()
         return self.hass.config_entries.async_get_entry(self.context["entry_id"])

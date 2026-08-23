@@ -136,11 +136,10 @@ def apply_cloud_state(appliance: Appliance, payload: dict[str, Any]) -> None:
     appliance.last_error = None
     connection = str(reported.get("connectionState") or "").upper()
     if connection in {"DISCONNECTED", "OFFLINE"}:
-        appliance.last_error = "Dishwasher is offline"
+        appliance.last_error = "Dishwasher is not connected"
     remote = str(reported.get("remoteControl") or "")
     if remote.upper() in {"DISABLED", "TEMPORARY_LOCKED"}:
         appliance.last_error = "Enable remote start on the dishwasher door"
-    appliance.cloud = True
     appliance._touch()
 
 

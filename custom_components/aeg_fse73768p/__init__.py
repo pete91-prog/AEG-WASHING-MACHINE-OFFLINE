@@ -9,11 +9,10 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant, ServiceCall
 from homeassistant.exceptions import HomeAssistantError, ServiceValidationError
 from homeassistant.helpers import config_validation as cv, device_registry as dr
-from homeassistant.helpers.storage import Store
 from homeassistant.helpers.typing import ConfigType
 
 from .appliance import Appliance, ApplianceError
-from .const import CONF_NAME, DEFAULT_NAME, DOMAIN, PLATFORMS, STORAGE_VERSION
+from .const import CONF_NAME, DEFAULT_NAME, DOMAIN, PLATFORMS
 from .coordinator import AEGCoordinator, create_cloud_client
 from .programs import PROGRAMS
 
@@ -25,7 +24,6 @@ SERVICE_START = "start_program"
 SERVICE_PAUSE = "pause"
 SERVICE_RESUME = "resume"
 SERVICE_CANCEL = "cancel"
-SERVICE_SET_DOOR = "set_door"
 
 START_SCHEMA = vol.Schema(
     {
@@ -39,12 +37,6 @@ START_SCHEMA = vol.Schema(
 )
 
 DEVICE_SCHEMA = vol.Schema({vol.Optional("device_id"): cv.string})
-DOOR_SCHEMA = vol.Schema(
-    {
-        vol.Optional("device_id"): cv.string,
-        vol.Required("open"): cv.boolean,
-    }
-)
 
 
 async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
@@ -54,15 +46,12 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
-    """Set up one dishwasher (cloud when credentials are present)."""
+    """Set up the real dishwasher via the Electrolux API."""
     hass.data.setdefault(DOMAIN, {})
-    store = Store(hass, STORAGE_VERSION, f"{DOMAIN}.{entry.entry_id}")
-    stored = await store.async_load() or {}
     appliance = Appliance(name=entry.data.get(CONF_NAME, DEFAULT_NAME))
-    appliance.restore(stored)
     client = create_cloud_client(hass, entry)
-    coordinator = AEGCoordinator(hass, entry, appliance, store, client)
-    await coordinator.async_setup_cloud()
+    coordinator = AEGCoordinator(hass, entry, appliance, client)
+    await coordinator.async_setup()
     await coordinator.async_config_entry_first_refresh()
     hass.data[DOMAIN][entry.entry_id] = coordinator
 
@@ -75,7 +64,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
 
 async def async_migrate_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
-    """v1 simulator entries keep working; v2 adds Electrolux tokens."""
+    """Bump old entries; setup then requires Electrolux tokens."""
     if entry.version < 2:
         hass.config_entries.async_update_entry(entry, version=2)
     return True
@@ -84,9 +73,7 @@ async def async_migrate_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Unload a config entry."""
     unload_ok = await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
-    coordinator: AEGCoordinator | None = hass.data[DOMAIN].pop(entry.entry_id, None)
-    if coordinator:
-        await coordinator.async_save()
+    hass.data[DOMAIN].pop(entry.entry_id, None)
     return unload_ok
 
 
@@ -130,20 +117,10 @@ def _async_register_services(hass: HomeAssistant) -> None:
         except ApplianceError as err:
             raise ServiceValidationError(str(err)) from err
 
-    async def _set_door(call: ServiceCall) -> None:
-        coordinator = _resolve(hass, call)
-        if coordinator.is_cloud and call.data["open"]:
-            raise ServiceValidationError(
-                "The real dishwasher door cannot be opened from Home Assistant"
-            )
-        coordinator.appliance.set_door(call.data["open"])
-        await coordinator.async_push()
-
     hass.services.async_register(DOMAIN, SERVICE_START, _start, schema=START_SCHEMA)
     hass.services.async_register(DOMAIN, SERVICE_PAUSE, _pause, schema=DEVICE_SCHEMA)
     hass.services.async_register(DOMAIN, SERVICE_RESUME, _resume, schema=DEVICE_SCHEMA)
     hass.services.async_register(DOMAIN, SERVICE_CANCEL, _cancel, schema=DEVICE_SCHEMA)
-    hass.services.async_register(DOMAIN, SERVICE_SET_DOOR, _set_door, schema=DOOR_SCHEMA)
 
 
 def _resolve(hass: HomeAssistant, call: ServiceCall) -> AEGCoordinator:
