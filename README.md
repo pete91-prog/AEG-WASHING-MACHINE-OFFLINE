@@ -58,7 +58,15 @@ HACS also reads **repository** metadata (not just files). In the GitHub repo, se
 5. Restart Home Assistant
 6. Settings → Devices & services → Add integration → **AEG FSE73768P**
 
-If you see **Invalid handler specified** / *Konfigurasjonsflyt kunne ikke lastes inn*, update to **1.0.1+** in HACS and restart Home Assistant. That error was a broken import in the Lovelace card loader.
+If you see **Invalid handler specified** / *Konfigurasjonsflyt kunne ikke lastes inn*, you need **1.0.1+**. HACS does **not** refresh custom repositories immediately (often not for many hours). Force it:
+
+1. **HACS** → **Integrations** → open **AEG FSE73768P**
+2. Top right **⋮** → **Update information** (or *Oppdater informasjon*)
+3. **⋮** → **Redownload** / **Download again** (*Last ned på nytt*) — pick **1.0.1** if it appears, otherwise **main**
+4. **Restart Home Assistant**
+5. Add the integration again
+
+If 1.0.1 still does not appear, remove the integration from HACS, add the custom repository again, and download **AEG FSE73768P**.
 
 The Lovelace card is registered as a frontend module on setup. In YAML Lovelace mode add:
 

@@ -1,0 +1,33 @@
+name: Release
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Read integration version
+        id: ver
+        run: |
+          VERSION=$(python3 -c "import json; print(json.load(open('custom_components/aeg_fse73768p/manifest.json'))['version'])")
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+      - name: Create GitHub release if missing
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          VERSION="${{ steps.ver.outputs.version }}"
+          if gh release view "$VERSION" >/dev/null 2>&1; then
+            echo "Release $VERSION already exists"
+            exit 0
+          fi
+          gh release create "$VERSION" \
+            --title "AEG FSE73768P $VERSION" \
+            --notes "Offline Home Assistant integration for the AEG FSE73768P. HACS uses this GitHub release as the installable version." \
+            --target "$GITHUB_SHA"
