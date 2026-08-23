@@ -8,9 +8,10 @@ from __future__ import annotations
 
 from collections.abc import Callable
 import logging
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
-from aiohttp import ClientError, ClientResponseError, ClientSession
+if TYPE_CHECKING:
+    from aiohttp import ClientSession
 
 from .appliance import ApplianceError
 
@@ -93,6 +94,8 @@ class ElectroluxAPI:
             self._on_tokens(self.access_token, self.refresh_token)
 
     async def _request(self, method: str, path: str, body: dict | None = None) -> Any:
+        from aiohttp import ClientError, ClientResponseError
+
         url = f"{BASE}{path}"
         for attempt in range(2):
             try:
