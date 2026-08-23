@@ -3,7 +3,7 @@
     "step": {
       "user": {
         "title": "AEG FSE73768P",
-        "description": "Connect the real dishwasher through the official Electrolux Group API. Create an API key and tokens at https://developer.electrolux.one/ (same email as My AEG Kitchen). Pair the machine in the AEG app first and enable remote start on the door.",
+        "description": "Connect the real dishwasher through the official Electrolux Group API. Create an API key and tokens at {developer_url} (same email as My AEG Kitchen). Pair the machine in the AEG app first and enable remote start on the door.",
         "data": {
           "name": "Name",
           "api_key": "API key",

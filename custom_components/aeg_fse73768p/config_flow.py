@@ -83,6 +83,7 @@ class AEGFSE73768PConfigFlow(ConfigFlow, domain=DOMAIN):
                 }
             ),
             errors=errors,
+            description_placeholders={"developer_url": "https://developer.electrolux.one/"},
         )
 
     async def async_step_pick(
