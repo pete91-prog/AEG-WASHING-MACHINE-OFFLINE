@@ -31,10 +31,7 @@ function formatRemaining(seconds) {
 function findStateEntity(hass, config) {
   if (config?.entity && hass.states[config.entity]) return config.entity;
   const match = Object.values(hass.states).find(
-    (st) =>
-      st.attributes?.model === "FSE73768P" &&
-      st.attributes?.offline === true &&
-      st.attributes?.state
+    (st) => st.attributes?.model === "FSE73768P" && st.attributes?.state
   );
   return match?.entity_id ?? null;
 }
@@ -126,7 +123,7 @@ class AEGFSE73768PCard extends HTMLElement {
         <div class="empty">
           <div class="mark"></div>
           <h2>AEG FSE73768P</h2>
-          <p>Add the integration first. This card auto-detects the offline dishwasher.</p>
+          <p>Add the integration first. This card auto-detects the FSE73768P.</p>
         </div>
       </ha-card>`;
   }
@@ -517,6 +514,6 @@ window.customCards = window.customCards || [];
 window.customCards.push({
   type: CARD_TAG,
   name: "AEG FSE73768P",
-  description: "Tesla-style visual card for the offline AEG FSE73768P dishwasher.",
+  description: "Tesla-style visual card for the AEG FSE73768P dishwasher.",
   preview: true,
 });

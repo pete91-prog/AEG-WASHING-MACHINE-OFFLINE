@@ -133,12 +133,16 @@ class AEGSwitch(AEGEntity, SwitchEntity):
         return super().available and self.entity_description.available_fn(self.appliance)
 
     async def async_turn_on(self, **kwargs) -> None:
+        if self._key == "door" and self.coordinator.is_cloud:
+            raise ServiceValidationError(
+                "The real dishwasher door cannot be opened from Home Assistant"
+            )
         try:
             self.entity_description.turn_on_fn(self.appliance)
         except ApplianceError as err:
             raise ServiceValidationError(str(err)) from err
         self.appliance._touch()
-        await self.coordinator.async_push()
+        await self._push_change()
 
     async def async_turn_off(self, **kwargs) -> None:
         try:
@@ -146,4 +150,10 @@ class AEGSwitch(AEGEntity, SwitchEntity):
         except ApplianceError as err:
             raise ServiceValidationError(str(err)) from err
         self.appliance._touch()
+        await self._push_change()
+
+    async def _push_change(self) -> None:
+        if self._key in {"extra_power", "glass_care", "extra_silent"}:
+            await self.coordinator.async_sync_selections()
+            return
         await self.coordinator.async_push()

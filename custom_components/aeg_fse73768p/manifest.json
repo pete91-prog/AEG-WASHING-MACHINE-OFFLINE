@@ -6,8 +6,8 @@
   "dependencies": ["frontend", "http"],
   "documentation": "https://github.com/pete91-prog/AEG-WASHING-MACHINE-OFFLINE",
   "integration_type": "device",
-  "iot_class": "calculated",
+  "iot_class": "cloud_polling",
   "issue_tracker": "https://github.com/pete91-prog/AEG-WASHING-MACHINE-OFFLINE/issues",
   "requirements": [],
-  "version": "1.0.1"
+  "version": "1.1.0"
 }

@@ -116,7 +116,19 @@ class AEGButton(AEGEntity, ButtonEntity):
 
     async def async_press(self) -> None:
         try:
-            self.entity_description.press_fn(self.appliance)
+            if self._key == "start":
+                await self.coordinator.async_start()
+            elif self._key.startswith("start_"):
+                await self.coordinator.async_start(self._key.removeprefix("start_"))
+            elif self._key == "pause":
+                if self.appliance.state == "paused":
+                    await self.coordinator.async_resume()
+                else:
+                    await self.coordinator.async_pause()
+            elif self._key == "cancel":
+                await self.coordinator.async_cancel()
+            else:
+                self.entity_description.press_fn(self.appliance)
+                await self.coordinator.async_push()
         except ApplianceError as err:
             raise ServiceValidationError(str(err)) from err
-        await self.coordinator.async_push()

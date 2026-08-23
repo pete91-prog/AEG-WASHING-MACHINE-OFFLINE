@@ -1,4 +1,4 @@
-"""AEG FSE73768P offline Home Assistant integration."""
+"""AEG FSE73768P Home Assistant integration."""
 
 from __future__ import annotations
 
@@ -6,7 +6,6 @@ import logging
 import voluptuous as vol
 
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import CONF_NAME
 from homeassistant.core import HomeAssistant, ServiceCall
 from homeassistant.exceptions import HomeAssistantError, ServiceValidationError
 from homeassistant.helpers import config_validation as cv, device_registry as dr
@@ -14,8 +13,8 @@ from homeassistant.helpers.storage import Store
 from homeassistant.helpers.typing import ConfigType
 
 from .appliance import Appliance, ApplianceError
-from .const import DEFAULT_NAME, DOMAIN, PLATFORMS, STORAGE_VERSION
-from .coordinator import AEGCoordinator
+from .const import CONF_NAME, DEFAULT_NAME, DOMAIN, PLATFORMS, STORAGE_VERSION
+from .coordinator import AEGCoordinator, create_cloud_client
 from .programs import PROGRAMS
 
 _LOGGER = logging.getLogger(__name__)
@@ -55,14 +54,15 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
-    """Set up one offline dishwasher."""
+    """Set up one dishwasher (cloud when credentials are present)."""
     hass.data.setdefault(DOMAIN, {})
     store = Store(hass, STORAGE_VERSION, f"{DOMAIN}.{entry.entry_id}")
     stored = await store.async_load() or {}
     appliance = Appliance(name=entry.data.get(CONF_NAME, DEFAULT_NAME))
     appliance.restore(stored)
-
-    coordinator = AEGCoordinator(hass, entry, appliance, store)
+    client = create_cloud_client(hass, entry)
+    coordinator = AEGCoordinator(hass, entry, appliance, store, client)
+    await coordinator.async_setup_cloud()
     await coordinator.async_config_entry_first_refresh()
     hass.data[DOMAIN][entry.entry_id] = coordinator
 
@@ -71,6 +71,13 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
     await JSModuleRegistration(hass).async_register()
     _async_register_services(hass)
+    return True
+
+
+async def async_migrate_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
+    """v1 simulator entries keep working; v2 adds Electrolux tokens."""
+    if entry.version < 2:
+        hass.config_entries.async_update_entry(entry, version=2)
     return True
 
 
@@ -98,31 +105,37 @@ def _async_register_services(hass: HomeAssistant) -> None:
                 coordinator.appliance.set_extra("glass_care", call.data["glass_care"])
             if "extra_silent" in call.data:
                 coordinator.appliance.set_extra("extra_silent", call.data["extra_silent"])
-            coordinator.appliance.start(call.data.get("program"))
+            await coordinator.async_start(call.data.get("program"))
         except ApplianceError as err:
             raise ServiceValidationError(str(err)) from err
-        await coordinator.async_push()
 
     async def _pause(call: ServiceCall) -> None:
         coordinator = _resolve(hass, call)
-        coordinator.appliance.pause()
-        await coordinator.async_push()
+        try:
+            await coordinator.async_pause()
+        except ApplianceError as err:
+            raise ServiceValidationError(str(err)) from err
 
     async def _resume(call: ServiceCall) -> None:
         coordinator = _resolve(hass, call)
         try:
-            coordinator.appliance.resume()
+            await coordinator.async_resume()
         except ApplianceError as err:
             raise ServiceValidationError(str(err)) from err
-        await coordinator.async_push()
 
     async def _cancel(call: ServiceCall) -> None:
         coordinator = _resolve(hass, call)
-        coordinator.appliance.cancel()
-        await coordinator.async_push()
+        try:
+            await coordinator.async_cancel()
+        except ApplianceError as err:
+            raise ServiceValidationError(str(err)) from err
 
     async def _set_door(call: ServiceCall) -> None:
         coordinator = _resolve(hass, call)
+        if coordinator.is_cloud and call.data["open"]:
+            raise ServiceValidationError(
+                "The real dishwasher door cannot be opened from Home Assistant"
+            )
         coordinator.appliance.set_door(call.data["open"])
         await coordinator.async_push()
 

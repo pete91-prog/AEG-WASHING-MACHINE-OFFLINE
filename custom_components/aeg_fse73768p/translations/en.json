@@ -3,11 +3,26 @@
     "step": {
       "user": {
         "title": "AEG FSE73768P",
-        "description": "Add a fully offline FSE73768P ComfortLift dishwasher. No AEG or Electrolux account is required — every QuickSelect programme is available locally.",
+        "description": "Connect the real dishwasher through the official Electrolux Group API. Create an API key and tokens at https://developer.electrolux.one/ (same email as My AEG Kitchen). Pair the machine in the AEG app first and enable remote start on the door.",
         "data": {
-          "name": "Name"
+          "name": "Name",
+          "api_key": "API key",
+          "access_token": "Access token",
+          "refresh_token": "Refresh token"
+        }
+      },
+      "pick": {
+        "title": "Choose dishwasher",
+        "description": "Several appliances are on this Electrolux account.",
+        "data": {
+          "appliance_id": "Appliance"
         }
       }
+    },
+    "error": {
+      "invalid_auth": "Electrolux rejected the API key or tokens. Generate new tokens on the developer portal.",
+      "cannot_connect": "Could not reach the Electrolux API.",
+      "no_appliances": "No appliances found. Pair the FSE73768P in My AEG Kitchen first."
     },
     "abort": {
       "already_configured": "This dishwasher is already configured"
@@ -133,7 +148,7 @@
   "services": {
     "start_program": {
       "name": "Start programme",
-      "description": "Start a QuickSelect programme on the offline FSE73768P.",
+      "description": "Start a QuickSelect programme on the FSE73768P.",
       "fields": {
         "device_id": { "name": "Device", "description": "Leave empty if you only have one dishwasher." },
         "program": { "name": "Programme", "description": "QuickSelect programme to run." },
@@ -157,7 +172,7 @@
     },
     "set_door": {
       "name": "Set door",
-      "description": "Open or close the door on the simulated appliance.",
+      "description": "Open or close the door on the local model. The real door cannot be opened remotely.",
       "fields": {
         "device_id": { "name": "Device", "description": "Target dishwasher." },
         "open": { "name": "Open", "description": "True to open, false to close." }

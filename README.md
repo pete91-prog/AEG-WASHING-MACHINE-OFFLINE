@@ -1,21 +1,21 @@
 # AEG FSE73768P for Home Assistant
 
-Offline Home Assistant integration for the **AEG 7000 ComfortLift FSE73768P** dishwasher.
+Home Assistant integration for the **AEG 7000 ComfortLift FSE73768P** dishwasher.
 
-No My AEG Kitchen account. No Electrolux cloud. Every QuickSelect programme is a one-tap entity, and a Tesla-style Lovelace card shows the machine as a living graphic while it runs.
+From 1.1.0 it drives the **real machine** through the official [Electrolux Group Developer API](https://developer.electrolux.one/) (same cloud My AEG Kitchen uses). AEG does not offer a local LAN API. The Tesla-style card still shows the running machine.
 
 [![hacs_badge](https://img.shields.io/badge/HACS-Custom-orange.svg)](https://github.com/hacs/integration)
 [![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=pete91-prog&repository=AEG-WASHING-MACHINE-OFFLINE&category=integration)
 
-> The FSE73768P is a fully integrated dishwasher (PNC 911 438 399). AEG does not publish a local LAN API for this model, so this integration keeps the full programme set on your Home Assistant box instead of phoning home.
+> The FSE73768P is a fully integrated dishwasher (PNC 911 438 399). Remote start/pause/programme changes go to Electrolux’s cloud after you pair the appliance in **My AEG Kitchen**.
 
 ## What you get
 
-- **Fully offline** — calculated locally, `iot_class: calculated`
-- **All factory programmes** as buttons, a select, and services
-- **EXTRAS** — ExtraPower, GlassCare, ExtraSilent (ECO)
-- **Tesla-style card** — cutaway cabinet, spinning spray arms, TimeBeam on the floor, ComfortLift basket, AirDry steam
-- **HACS install** — one repository, card is registered automatically
+- **Real machine control** via the official Electrolux API (start, pause, resume, stop, programme)
+- Live state: running, remaining time, phase, door, salt / rinse aid
+- All QuickSelect programmes as buttons, a select, and services
+- Tesla-style card with spray-arm graphics while a cycle runs
+- HACS install — one repository, card registered automatically
 
 ![Running FSE73768P card](images/card-preview.svg)
 
@@ -45,28 +45,38 @@ The machine advances through prewash → main wash → rinses → drying → Air
 
 HACS also reads **repository** metadata (not just files). In the GitHub repo, set:
 
-- **Description:** `Offline Home Assistant integration for the AEG FSE73768P dishwasher`
+- **Description:** `Home Assistant integration for the AEG FSE73768P dishwasher`
 - **Topics:** `home-assistant`, `hacs`, `integration`, `aeg`, `dishwasher`
 - **License:** MIT (this repo already includes `LICENSE`; GitHub picks it up on the default branch)
 
-## Install with HACS
+## Connect the real dishwasher
+
+1. Pair the FSE73768P in **My AEG Kitchen** (2.4 GHz Wi‑Fi, hold the two connectivity buttons until the display shows `AP`).
+2. Use the **same email** for [developer.electrolux.one](https://developer.electrolux.one/).
+3. Create an **API key**, then generate an **access token** and **refresh token**.
+4. On the dishwasher, enable **remote start** before HA can start a cycle.
+
+Then in Home Assistant:
 
 1. HACS → Integrations → Custom repositories
 2. URL: `https://github.com/pete91-prog/AEG-WASHING-MACHINE-OFFLINE`
 3. Category: **Integration**
-4. Download **AEG FSE73768P**
+4. Download **AEG FSE73768P** (1.1.0 or newer)
 5. Restart Home Assistant
-6. Settings → Devices & services → Add integration → **AEG FSE73768P**
+6. Settings → Devices & services → Add **AEG FSE73768P**
+7. Paste API key, access token, and refresh token
 
-If you see **Invalid handler specified** / *Konfigurasjonsflyt kunne ikke lastes inn*, you need **1.0.1+**. HACS does **not** refresh custom repositories immediately (often not for many hours). Force it:
+If several appliances are on the account, pick the FSE73768P.
+
+If you see **Invalid handler specified** / *Konfigurasjonsflyt kunne ikke lastes inn*, you need **1.0.1+**. For the real machine you need **1.1.0+**. HACS does **not** refresh custom repositories immediately (often not for many hours). Force it:
 
 1. **HACS** → **Integrations** → open **AEG FSE73768P**
 2. Top right **⋮** → **Update information** (or *Oppdater informasjon*)
-3. **⋮** → **Redownload** / **Download again** (*Last ned på nytt*) — pick **1.0.1** if it appears, otherwise **main**
+3. **⋮** → **Redownload** / **Download again** (*Last ned på nytt*) — pick **1.1.0** if it appears, otherwise **main**
 4. **Restart Home Assistant**
-5. Add the integration again
+5. Add the integration again and paste Electrolux tokens
 
-If 1.0.1 still does not appear, remove the integration from HACS, add the custom repository again, and download **AEG FSE73768P**.
+If 1.1.0 still does not appear, remove the integration from HACS, add the custom repository again, and download **AEG FSE73768P**.
 
 The Lovelace card is registered as a frontend module on setup. In YAML Lovelace mode add:
 
@@ -94,7 +104,7 @@ The device exposes:
 | --- | --- |
 | `aeg_fse73768p.start_program` | Start any programme, with optional extras and delay |
 | `aeg_fse73768p.pause` / `resume` / `cancel` | Cycle control |
-| `aeg_fse73768p.set_door` | Open or close the door (opening pauses a wash) |
+| `aeg_fse73768p.set_door` | Local door model only — the real door cannot be opened remotely |
 
 ```yaml
 action: aeg_fse73768p.start_program
@@ -117,9 +127,11 @@ The card behaves like a vehicle card in Home Assistant:
 
 ## Notes
 
-This is a local model of the FSE73768P, not a reverse-engineered Wi-Fi bind. Use it for dashboards, cheap-rate automations, and a complete programme panel without the AEG cloud. Pair a smart plug if you also want measured watts from the real appliance.
+AEG does not expose a local LAN API. Start, pause, resume, stop, and programme changes go through the official Electrolux Group API after the dishwasher is paired in **My AEG Kitchen**. Enable **remote start** on the door or Electrolux will reject the command.
 
-Settings and cycle counts survive Home Assistant restarts. A wash that is mid-cycle at restart returns to idle (the real machine is not being driven over the network).
+The Tesla-style card reads live cloud state (remaining time, phase, door, alerts). ExtraPower / GlassCare / ExtraSilent are sent with the next start. The physical door cannot be opened from Home Assistant.
+
+Old 1.0.x entries without tokens stay on the local QuickSelect model. Add the integration again (or reconfigure) and paste developer tokens to drive the real machine.
 
 ## Development
 

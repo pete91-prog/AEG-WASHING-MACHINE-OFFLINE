@@ -94,4 +94,7 @@ class AEGNumber(AEGEntity, NumberEntity):
         except ApplianceError as err:
             raise ServiceValidationError(str(err)) from err
         self.appliance._touch()
+        if self._key == "delay_start":
+            await self.coordinator.async_sync_selections()
+            return
         await self.coordinator.async_push()

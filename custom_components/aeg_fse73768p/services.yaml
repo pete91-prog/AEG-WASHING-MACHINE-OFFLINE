@@ -1,6 +1,6 @@
 start_program:
   name: Start programme
-  description: Start a QuickSelect programme on the offline FSE73768P.
+  description: Start a QuickSelect programme on the FSE73768P.
   fields:
     device_id:
       name: Device
@@ -74,7 +74,7 @@ cancel:
 
 set_door:
   name: Set door
-  description: Open or close the door on the simulated appliance.
+  description: Open or close the door on the local model. The real door cannot be opened remotely.
   fields:
     device_id:
       name: Device
