@@ -41,6 +41,14 @@ Values follow the 7000-series QuickSelect manuals. ECO is the Ecodesign (EU) 201
 
 The machine advances through prewash → main wash → rinses → drying → AirDry, pauses if you open the door, and opens the door itself for AirDry when that setting is on. TimeBeam is red while running, green when finished, and flashes on a fault.
 
+## GitHub settings for HACS
+
+HACS also reads **repository** metadata (not just files). In the GitHub repo, set:
+
+- **Description:** `Offline Home Assistant integration for the AEG FSE73768P dishwasher`
+- **Topics:** `home-assistant`, `hacs`, `integration`, `aeg`, `dishwasher`
+- **License:** MIT (this repo already includes `LICENSE`; GitHub picks it up on the default branch)
+
 ## Install with HACS
 
 1. HACS → Integrations → Custom repositories

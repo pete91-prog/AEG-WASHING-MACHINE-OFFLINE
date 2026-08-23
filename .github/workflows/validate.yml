@@ -19,6 +19,9 @@ jobs:
         uses: hacs/action@main
         with:
           category: integration
+          # Description, topics, and GitHub license detection are repository
+          # settings (and license is only visible on the default branch).
+          ignore: topics description license
 
   tests:
     runs-on: ubuntu-latest
