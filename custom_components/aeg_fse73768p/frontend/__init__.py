@@ -10,7 +10,7 @@ from homeassistant.components.http import StaticPathConfig
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.event import async_call_later
 
-from .const import CARD_FILENAME, DOMAIN, URL_BASE
+from ..const import CARD_FILENAME, DOMAIN, URL_BASE
 
 _LOGGER = logging.getLogger(__name__)
 

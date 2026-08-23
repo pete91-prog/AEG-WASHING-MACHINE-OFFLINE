@@ -16,7 +16,6 @@ from homeassistant.helpers.typing import ConfigType
 from .appliance import Appliance, ApplianceError
 from .const import DEFAULT_NAME, DOMAIN, PLATFORMS, STORAGE_VERSION
 from .coordinator import AEGCoordinator
-from .frontend import JSModuleRegistration
 from .programs import PROGRAMS
 
 _LOGGER = logging.getLogger(__name__)
@@ -68,6 +67,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     hass.data[DOMAIN][entry.entry_id] = coordinator
 
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
+    from .frontend import JSModuleRegistration
+
     await JSModuleRegistration(hass).async_register()
     _async_register_services(hass)
     return True

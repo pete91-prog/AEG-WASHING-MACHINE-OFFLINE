@@ -6,9 +6,14 @@ from typing import Any
 
 import voluptuous as vol
 
-from homeassistant.config_entries import ConfigFlow, ConfigFlowResult
+from homeassistant.config_entries import ConfigFlow
 from homeassistant.const import CONF_NAME
 from homeassistant.util import slugify
+
+try:
+    from homeassistant.config_entries import ConfigFlowResult
+except ImportError:  # Home Assistant < 2024.4
+    from homeassistant.data_entry_flow import FlowResult as ConfigFlowResult
 
 from .const import DEFAULT_NAME, DOMAIN
 

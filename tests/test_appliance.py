@@ -167,3 +167,18 @@ def test_restore_does_not_resume_a_mid_cycle() -> None:
     assert machine.program_id == "2h40"
     assert machine.cycle_count == 9
     assert "glass_care" in machine.extras
+
+
+def test_frontend_imports_parent_const() -> None:
+    """A wrong relative import here breaks HA config flow with Invalid handler."""
+    from pathlib import Path
+
+    source = (
+        Path(__file__).resolve().parents[1]
+        / "custom_components"
+        / "aeg_fse73768p"
+        / "frontend"
+        / "__init__.py"
+    ).read_text(encoding="utf-8")
+    assert "from ..const import" in source
+    assert "from .const import" not in source
