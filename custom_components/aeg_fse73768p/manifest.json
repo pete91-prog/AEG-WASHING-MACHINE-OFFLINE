@@ -1,0 +1,13 @@
+{
+  "domain": "aeg_fse73768p",
+  "name": "AEG FSE73768P",
+  "codeowners": ["@pete91-prog"],
+  "config_flow": true,
+  "dependencies": ["frontend", "http"],
+  "documentation": "https://github.com/pete91-prog/AEG-WASHING-MACHINE-OFFLINE",
+  "integration_type": "device",
+  "iot_class": "calculated",
+  "issue_tracker": "https://github.com/pete91-prog/AEG-WASHING-MACHINE-OFFLINE/issues",
+  "requirements": [],
+  "version": "1.0.0"
+}

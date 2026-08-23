@@ -1,0 +1,167 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "AEG FSE73768P",
+        "description": "Add a fully offline FSE73768P ComfortLift dishwasher. No AEG or Electrolux account is required — every QuickSelect programme is available locally.",
+        "data": {
+          "name": "Name"
+        }
+      }
+    },
+    "abort": {
+      "already_configured": "This dishwasher is already configured"
+    }
+  },
+  "entity": {
+    "sensor": {
+      "state": {
+        "name": "State",
+        "state": {
+          "off": "Off",
+          "idle": "Idle",
+          "delayed": "Delayed start",
+          "running": "Running",
+          "paused": "Paused",
+          "airdry": "AirDry",
+          "complete": "Complete",
+          "error": "Error"
+        }
+      },
+      "program": {
+        "name": "Programme",
+        "state": {
+          "quick": "Quick",
+          "1h": "1h",
+          "1h30": "1h 30min",
+          "2h40": "2h 40min",
+          "eco": "ECO",
+          "auto_sense": "AUTO Sense",
+          "machine_care": "Machine Care"
+        }
+      },
+      "cycle_phase": {
+        "name": "Cycle phase",
+        "state": {
+          "idle": "Idle",
+          "delay": "Delayed start",
+          "prewash": "Prewash",
+          "main_wash": "Main wash",
+          "intermediate_rinse": "Intermediate rinse",
+          "final_rinse": "Final rinse",
+          "drying": "Drying",
+          "airdry": "AirDry",
+          "complete": "Complete",
+          "paused": "Paused"
+        }
+      },
+      "time_remaining": { "name": "Time remaining" },
+      "cycle_progress": { "name": "Progress" },
+      "wash_temperature": { "name": "Wash temperature" },
+      "current_temperature": { "name": "Current temperature" },
+      "ecometer": { "name": "Ecometer" },
+      "beam_on_floor": {
+        "name": "TimeBeam",
+        "state": {
+          "off": "Off",
+          "red": "Red — running",
+          "green": "Green — complete",
+          "flash": "Flashing — fault"
+        }
+      },
+      "estimated_energy": { "name": "Energy this cycle" },
+      "estimated_water": { "name": "Water this cycle" },
+      "cycle_count": { "name": "Cycle count" },
+      "noise": { "name": "Noise" }
+    },
+    "binary_sensor": {
+      "running": { "name": "Running" },
+      "door": { "name": "Door" },
+      "salt": { "name": "Salt" },
+      "rinse_aid": { "name": "Rinse aid" },
+      "machine_care": { "name": "Machine Care needed" },
+      "connectivity": { "name": "Powered" }
+    },
+    "select": {
+      "program": {
+        "name": "Programme",
+        "state": {
+          "quick": "Quick",
+          "1h": "1h",
+          "1h30": "1h 30min",
+          "2h40": "2h 40min",
+          "eco": "ECO",
+          "auto_sense": "AUTO Sense",
+          "machine_care": "Machine Care"
+        }
+      }
+    },
+    "switch": {
+      "power": { "name": "Power" },
+      "door_switch": { "name": "Door open" },
+      "extra_power": { "name": "ExtraPower" },
+      "glass_care": { "name": "GlassCare" },
+      "extra_silent": { "name": "ExtraSilent" },
+      "airdry": { "name": "AirDry" },
+      "end_sound": { "name": "End sound" },
+      "comfort_lift": { "name": "ComfortLift" }
+    },
+    "button": {
+      "start": { "name": "Start" },
+      "pause": { "name": "Pause" },
+      "cancel": { "name": "Cancel" },
+      "start_quick": { "name": "Start Quick" },
+      "start_1h": { "name": "Start 1h" },
+      "start_1h30": { "name": "Start 1h 30min" },
+      "start_2h40": { "name": "Start 2h 40min" },
+      "start_eco": { "name": "Start ECO" },
+      "start_auto_sense": { "name": "Start AUTO Sense" },
+      "start_machine_care": { "name": "Start Machine Care" },
+      "refill_salt": { "name": "Refill salt" },
+      "refill_rinse_aid": { "name": "Refill rinse aid" },
+      "reset_machine_care": { "name": "Reset Machine Care" }
+    },
+    "number": {
+      "delay_start": { "name": "Delay start" },
+      "water_softener": { "name": "Water softener" },
+      "rinse_aid_dosage": { "name": "Rinse aid dosage" }
+    },
+    "light": {
+      "interior_light": { "name": "Interior light" }
+    }
+  },
+  "services": {
+    "start_program": {
+      "name": "Start programme",
+      "description": "Start a QuickSelect programme on the offline FSE73768P.",
+      "fields": {
+        "device_id": { "name": "Device", "description": "Leave empty if you only have one dishwasher." },
+        "program": { "name": "Programme", "description": "QuickSelect programme to run." },
+        "extra_power": { "name": "ExtraPower", "description": "Raise wash temperature and duration." },
+        "glass_care": { "name": "GlassCare", "description": "Cap wash temperature at 45 °C." },
+        "extra_silent": { "name": "ExtraSilent", "description": "Quieter wash (ECO only)." },
+        "delay_hours": { "name": "Delay start", "description": "Postpone start by up to 24 hours." }
+      }
+    },
+    "pause": {
+      "name": "Pause",
+      "description": "Pause a running programme."
+    },
+    "resume": {
+      "name": "Resume",
+      "description": "Resume after a pause. The door must be closed."
+    },
+    "cancel": {
+      "name": "Cancel",
+      "description": "Cancel the current programme or delayed start."
+    },
+    "set_door": {
+      "name": "Set door",
+      "description": "Open or close the door on the simulated appliance.",
+      "fields": {
+        "device_id": { "name": "Device", "description": "Target dishwasher." },
+        "open": { "name": "Open", "description": "True to open, false to close." }
+      }
+    }
+  }
+}
