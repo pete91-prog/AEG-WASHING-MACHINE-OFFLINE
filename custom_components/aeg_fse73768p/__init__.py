@@ -1,4 +1,4 @@
-"""AEG FSE73768P offline Home Assistant integration."""
+"""AEG FSE73768P Home Assistant integration."""
 
 from __future__ import annotations
 
@@ -6,16 +6,14 @@ import logging
 import voluptuous as vol
 
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import CONF_NAME
 from homeassistant.core import HomeAssistant, ServiceCall
 from homeassistant.exceptions import HomeAssistantError, ServiceValidationError
 from homeassistant.helpers import config_validation as cv, device_registry as dr
-from homeassistant.helpers.storage import Store
 from homeassistant.helpers.typing import ConfigType
 
 from .appliance import Appliance, ApplianceError
-from .const import DEFAULT_NAME, DOMAIN, PLATFORMS, STORAGE_VERSION
-from .coordinator import AEGCoordinator
+from .const import CONF_NAME, DEFAULT_NAME, DOMAIN, PLATFORMS
+from .coordinator import AEGCoordinator, create_cloud_client
 from .programs import PROGRAMS
 
 _LOGGER = logging.getLogger(__name__)
@@ -26,7 +24,6 @@ SERVICE_START = "start_program"
 SERVICE_PAUSE = "pause"
 SERVICE_RESUME = "resume"
 SERVICE_CANCEL = "cancel"
-SERVICE_SET_DOOR = "set_door"
 
 START_SCHEMA = vol.Schema(
     {
@@ -40,12 +37,6 @@ START_SCHEMA = vol.Schema(
 )
 
 DEVICE_SCHEMA = vol.Schema({vol.Optional("device_id"): cv.string})
-DOOR_SCHEMA = vol.Schema(
-    {
-        vol.Optional("device_id"): cv.string,
-        vol.Required("open"): cv.boolean,
-    }
-)
 
 
 async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
@@ -55,14 +46,12 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
-    """Set up one offline dishwasher."""
+    """Set up the real dishwasher via the Electrolux API."""
     hass.data.setdefault(DOMAIN, {})
-    store = Store(hass, STORAGE_VERSION, f"{DOMAIN}.{entry.entry_id}")
-    stored = await store.async_load() or {}
     appliance = Appliance(name=entry.data.get(CONF_NAME, DEFAULT_NAME))
-    appliance.restore(stored)
-
-    coordinator = AEGCoordinator(hass, entry, appliance, store)
+    client = create_cloud_client(hass, entry)
+    coordinator = AEGCoordinator(hass, entry, appliance, client)
+    await coordinator.async_setup()
     await coordinator.async_config_entry_first_refresh()
     hass.data[DOMAIN][entry.entry_id] = coordinator
 
@@ -74,12 +63,17 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     return True
 
 
+async def async_migrate_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
+    """Bump old entries; setup then requires Electrolux tokens."""
+    if entry.version < 2:
+        hass.config_entries.async_update_entry(entry, version=2)
+    return True
+
+
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Unload a config entry."""
     unload_ok = await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
-    coordinator: AEGCoordinator | None = hass.data[DOMAIN].pop(entry.entry_id, None)
-    if coordinator:
-        await coordinator.async_save()
+    hass.data[DOMAIN].pop(entry.entry_id, None)
     return unload_ok
 
 
@@ -98,39 +92,35 @@ def _async_register_services(hass: HomeAssistant) -> None:
                 coordinator.appliance.set_extra("glass_care", call.data["glass_care"])
             if "extra_silent" in call.data:
                 coordinator.appliance.set_extra("extra_silent", call.data["extra_silent"])
-            coordinator.appliance.start(call.data.get("program"))
+            await coordinator.async_start(call.data.get("program"))
         except ApplianceError as err:
             raise ServiceValidationError(str(err)) from err
-        await coordinator.async_push()
 
     async def _pause(call: ServiceCall) -> None:
         coordinator = _resolve(hass, call)
-        coordinator.appliance.pause()
-        await coordinator.async_push()
+        try:
+            await coordinator.async_pause()
+        except ApplianceError as err:
+            raise ServiceValidationError(str(err)) from err
 
     async def _resume(call: ServiceCall) -> None:
         coordinator = _resolve(hass, call)
         try:
-            coordinator.appliance.resume()
+            await coordinator.async_resume()
         except ApplianceError as err:
             raise ServiceValidationError(str(err)) from err
-        await coordinator.async_push()
 
     async def _cancel(call: ServiceCall) -> None:
         coordinator = _resolve(hass, call)
-        coordinator.appliance.cancel()
-        await coordinator.async_push()
-
-    async def _set_door(call: ServiceCall) -> None:
-        coordinator = _resolve(hass, call)
-        coordinator.appliance.set_door(call.data["open"])
-        await coordinator.async_push()
+        try:
+            await coordinator.async_cancel()
+        except ApplianceError as err:
+            raise ServiceValidationError(str(err)) from err
 
     hass.services.async_register(DOMAIN, SERVICE_START, _start, schema=START_SCHEMA)
     hass.services.async_register(DOMAIN, SERVICE_PAUSE, _pause, schema=DEVICE_SCHEMA)
     hass.services.async_register(DOMAIN, SERVICE_RESUME, _resume, schema=DEVICE_SCHEMA)
     hass.services.async_register(DOMAIN, SERVICE_CANCEL, _cancel, schema=DEVICE_SCHEMA)
-    hass.services.async_register(DOMAIN, SERVICE_SET_DOOR, _set_door, schema=DOOR_SCHEMA)
 
 
 def _resolve(hass: HomeAssistant, call: ServiceCall) -> AEGCoordinator:

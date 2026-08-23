@@ -38,7 +38,6 @@ class AEGProgramSelect(AEGEntity, SelectEntity):
 
     async def async_select_option(self, option: str) -> None:
         try:
-            self.appliance.set_program(option)
+            await self.coordinator.async_set_program(option)
         except ApplianceError as err:
             raise ServiceValidationError(str(err)) from err
-        await self.coordinator.async_push()

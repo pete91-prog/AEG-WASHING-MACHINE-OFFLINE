@@ -1,4 +1,4 @@
-"""Unit tests for the offline FSE73768P state machine."""
+"""Unit tests for the FSE73768P programme model."""
 
 from __future__ import annotations
 
@@ -141,7 +141,6 @@ def test_power_off_cancels_a_run() -> None:
 
 def test_snapshot_lists_every_programme() -> None:
     payload = Appliance().snapshot()
-    assert payload["offline"] is True
     assert payload["model"] == "FSE73768P"
     assert [item["key"] for item in payload["programs"]] == list(PROGRAM_ORDER)
 

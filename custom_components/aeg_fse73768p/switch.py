@@ -1,4 +1,4 @@
-"""Switches for power, extras, door and settings."""
+"""Switches for extras that the real machine accepts."""
 
 from __future__ import annotations
 
@@ -7,7 +7,6 @@ from dataclasses import dataclass
 
 from homeassistant.components.switch import SwitchEntity, SwitchEntityDescription
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import EntityCategory
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ServiceValidationError
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
@@ -36,22 +35,6 @@ def _set_extra(extra: str, enabled: bool) -> Callable[[Appliance], None]:
 
 SWITCHES: tuple[AEGSwitchDescription, ...] = (
     AEGSwitchDescription(
-        key="power",
-        translation_key="power",
-        icon="mdi:power",
-        is_on_fn=lambda a: a.powered,
-        turn_on_fn=lambda a: a.power_on(),
-        turn_off_fn=lambda a: a.power_off(),
-    ),
-    AEGSwitchDescription(
-        key="door",
-        translation_key="door_switch",
-        icon="mdi:door",
-        is_on_fn=lambda a: a.door_open,
-        turn_on_fn=lambda a: a.set_door(True),
-        turn_off_fn=lambda a: a.set_door(False),
-    ),
-    AEGSwitchDescription(
         key="extra_power",
         translation_key="extra_power",
         icon="mdi:fire",
@@ -77,33 +60,6 @@ SWITCHES: tuple[AEGSwitchDescription, ...] = (
         turn_on_fn=_set_extra(EXTRA_SILENT, True),
         turn_off_fn=_set_extra(EXTRA_SILENT, False),
         available_fn=lambda a: EXTRA_SILENT in a.program.extras,
-    ),
-    AEGSwitchDescription(
-        key="airdry",
-        translation_key="airdry",
-        icon="mdi:door-open",
-        entity_category=EntityCategory.CONFIG,
-        is_on_fn=lambda a: a.airdry_enabled,
-        turn_on_fn=lambda a: setattr(a, "airdry_enabled", True),
-        turn_off_fn=lambda a: setattr(a, "airdry_enabled", False),
-    ),
-    AEGSwitchDescription(
-        key="end_sound",
-        translation_key="end_sound",
-        icon="mdi:volume-high",
-        entity_category=EntityCategory.CONFIG,
-        is_on_fn=lambda a: a.end_sound,
-        turn_on_fn=lambda a: setattr(a, "end_sound", True),
-        turn_off_fn=lambda a: setattr(a, "end_sound", False),
-    ),
-    AEGSwitchDescription(
-        key="comfort_lift",
-        translation_key="comfort_lift",
-        icon="mdi:arrow-up-bold-box",
-        is_on_fn=lambda a: a.comfort_lift and a.door_open,
-        turn_on_fn=lambda a: setattr(a, "comfort_lift", True) if a.door_open else None,
-        turn_off_fn=lambda a: setattr(a, "comfort_lift", False),
-        available_fn=lambda a: a.door_open,
     ),
 )
 
@@ -137,13 +93,11 @@ class AEGSwitch(AEGEntity, SwitchEntity):
             self.entity_description.turn_on_fn(self.appliance)
         except ApplianceError as err:
             raise ServiceValidationError(str(err)) from err
-        self.appliance._touch()
-        await self.coordinator.async_push()
+        await self.coordinator.async_sync_selections()
 
     async def async_turn_off(self, **kwargs) -> None:
         try:
             self.entity_description.turn_off_fn(self.appliance)
         except ApplianceError as err:
             raise ServiceValidationError(str(err)) from err
-        self.appliance._touch()
-        await self.coordinator.async_push()
+        await self.coordinator.async_sync_selections()

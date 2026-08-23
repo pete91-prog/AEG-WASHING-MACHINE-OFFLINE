@@ -1,7 +1,7 @@
-"""Fully local FSE73768P dishwasher state machine.
+"""FSE73768P dishwasher state model.
 
-No cloud, no LAN calls — this models the real QuickSelect programmes so they
-are available in Home Assistant even when My AEG Kitchen is offline.
+Holds the last live Electrolux state plus QuickSelect metadata for the card.
+Commands go to the real machine through the coordinator.
 """
 
 from __future__ import annotations
@@ -47,7 +47,7 @@ class ApplianceError(Exception):
 
 @dataclass
 class Appliance:
-    """Offline AEG FSE73768P."""
+    """AEG FSE73768P state used by the Electrolux coordinator."""
 
     name: str = "AEG FSE73768P"
     powered: bool = True
@@ -374,7 +374,6 @@ class Appliance:
             "model": "FSE73768P",
             "pnc": "911438399",
             "series": "7000 ComfortLift",
-            "offline": True,
             "powered": self.powered,
             "state": self.state,
             "program": self.program_id,

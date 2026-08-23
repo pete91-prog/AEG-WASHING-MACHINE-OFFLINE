@@ -31,10 +31,7 @@ function formatRemaining(seconds) {
 function findStateEntity(hass, config) {
   if (config?.entity && hass.states[config.entity]) return config.entity;
   const match = Object.values(hass.states).find(
-    (st) =>
-      st.attributes?.model === "FSE73768P" &&
-      st.attributes?.offline === true &&
-      st.attributes?.state
+    (st) => st.attributes?.model === "FSE73768P" && st.attributes?.state
   );
   return match?.entity_id ?? null;
 }
@@ -126,7 +123,7 @@ class AEGFSE73768PCard extends HTMLElement {
         <div class="empty">
           <div class="mark"></div>
           <h2>AEG FSE73768P</h2>
-          <p>Add the integration first. This card auto-detects the offline dishwasher.</p>
+          <p>Add the integration first. This card auto-detects the FSE73768P.</p>
         </div>
       </ha-card>`;
   }
@@ -164,8 +161,6 @@ class AEGFSE73768PCard extends HTMLElement {
           ${extraBtn("ExtraSilent", "extra_silent", data)}
         </div>
         <div class="actions">
-          <button class="ghost" data-act="door">${data.door_open ? "Close door" : "Open door"}</button>
-          <button class="ghost" data-act="lift" ${data.door_open ? "" : "disabled"}>ComfortLift</button>
           ${running
             ? `<button class="primary" data-act="pause">${data.state === "paused" ? "Resume" : "Pause"}</button>
                <button class="danger" data-act="cancel">Cancel</button>`
@@ -204,11 +199,6 @@ class AEGFSE73768PCard extends HTMLElement {
     act("start", () => this._call("start_program", { program: data?.program }));
     act("pause", () => this._call(data?.state === "paused" ? "resume" : "pause"));
     act("cancel", () => this._call("cancel"));
-    act("door", () => this._call("set_door", { open: !data?.door_open }));
-    act("lift", () => {
-      const id = this._entity("comfort_lift");
-      if (id) this._hass.callService("switch", "toggle", { entity_id: id });
-    });
   }
 }
 
@@ -517,6 +507,6 @@ window.customCards = window.customCards || [];
 window.customCards.push({
   type: CARD_TAG,
   name: "AEG FSE73768P",
-  description: "Tesla-style visual card for the offline AEG FSE73768P dishwasher.",
+  description: "Tesla-style visual card for the AEG FSE73768P dishwasher.",
   preview: true,
 });

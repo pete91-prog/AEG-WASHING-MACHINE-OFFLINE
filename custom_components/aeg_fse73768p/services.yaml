@@ -1,6 +1,6 @@
 start_program:
   name: Start programme
-  description: Start a QuickSelect programme on the offline FSE73768P.
+  description: Start a QuickSelect programme on the FSE73768P.
   fields:
     device_id:
       name: Device
@@ -44,7 +44,7 @@ start_program:
 
 pause:
   name: Pause
-  description: Pause a running programme (same as opening the door).
+  description: Pause a running programme.
   fields:
     device_id:
       name: Device
@@ -71,18 +71,3 @@ cancel:
       selector:
         device:
           integration: aeg_fse73768p
-
-set_door:
-  name: Set door
-  description: Open or close the door on the simulated appliance.
-  fields:
-    device_id:
-      name: Device
-      selector:
-        device:
-          integration: aeg_fse73768p
-    open:
-      name: Open
-      required: true
-      selector:
-        boolean:

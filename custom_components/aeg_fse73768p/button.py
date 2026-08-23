@@ -2,17 +2,15 @@
 
 from __future__ import annotations
 
-from collections.abc import Callable
 from dataclasses import dataclass
 
 from homeassistant.components.button import ButtonEntity, ButtonEntityDescription
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import EntityCategory
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ServiceValidationError
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
-from .appliance import Appliance, ApplianceError
+from .appliance import ApplianceError
 from .const import DOMAIN
 from .coordinator import AEGCoordinator
 from .entity import AEGEntity
@@ -21,64 +19,20 @@ from .programs import PROGRAM_ORDER, PROGRAMS
 
 @dataclass(frozen=True, kw_only=True)
 class AEGButtonDescription(ButtonEntityDescription):
-    press_fn: Callable[[Appliance], None]
-
-
-def _start_program(program_id: str) -> Callable[[Appliance], None]:
-    def _press(appliance: Appliance) -> None:
-        appliance.start(program_id)
-
-    return _press
+    pass
 
 
 BUTTONS: tuple[AEGButtonDescription, ...] = (
-    AEGButtonDescription(
-        key="start",
-        translation_key="start",
-        icon="mdi:play",
-        press_fn=lambda a: a.start(),
-    ),
-    AEGButtonDescription(
-        key="pause",
-        translation_key="pause",
-        icon="mdi:pause",
-        press_fn=lambda a: a.pause(),
-    ),
-    AEGButtonDescription(
-        key="cancel",
-        translation_key="cancel",
-        icon="mdi:stop",
-        press_fn=lambda a: a.cancel(),
-    ),
+    AEGButtonDescription(key="start", translation_key="start", icon="mdi:play"),
+    AEGButtonDescription(key="pause", translation_key="pause", icon="mdi:pause"),
+    AEGButtonDescription(key="cancel", translation_key="cancel", icon="mdi:stop"),
     *(
         AEGButtonDescription(
             key=f"start_{key}",
             translation_key=f"start_{key}",
             icon="mdi:play-circle-outline",
-            press_fn=_start_program(key),
         )
         for key in PROGRAM_ORDER
-    ),
-    AEGButtonDescription(
-        key="refill_salt",
-        translation_key="refill_salt",
-        icon="mdi:shaker",
-        entity_category=EntityCategory.CONFIG,
-        press_fn=lambda a: a.refill_salt(),
-    ),
-    AEGButtonDescription(
-        key="refill_rinse_aid",
-        translation_key="refill_rinse_aid",
-        icon="mdi:water-plus",
-        entity_category=EntityCategory.CONFIG,
-        press_fn=lambda a: a.refill_rinse_aid(),
-    ),
-    AEGButtonDescription(
-        key="reset_machine_care",
-        translation_key="reset_machine_care",
-        icon="mdi:broom",
-        entity_category=EntityCategory.CONFIG,
-        press_fn=lambda a: a.reset_machine_care(),
     ),
 )
 
@@ -116,7 +70,16 @@ class AEGButton(AEGEntity, ButtonEntity):
 
     async def async_press(self) -> None:
         try:
-            self.entity_description.press_fn(self.appliance)
+            if self._key == "start":
+                await self.coordinator.async_start()
+            elif self._key.startswith("start_"):
+                await self.coordinator.async_start(self._key.removeprefix("start_"))
+            elif self._key == "pause":
+                if self.appliance.state == "paused":
+                    await self.coordinator.async_resume()
+                else:
+                    await self.coordinator.async_pause()
+            elif self._key == "cancel":
+                await self.coordinator.async_cancel()
         except ApplianceError as err:
             raise ServiceValidationError(str(err)) from err
-        await self.coordinator.async_push()

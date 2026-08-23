@@ -3,11 +3,26 @@
     "step": {
       "user": {
         "title": "AEG FSE73768P",
-        "description": "Add a fully offline FSE73768P ComfortLift dishwasher. No AEG or Electrolux account is required — every QuickSelect programme is available locally.",
+        "description": "Connect the real dishwasher through the official Electrolux Group API. Create an API key and tokens at {developer_url} (same email as My AEG Kitchen). Pair the machine in the AEG app first and enable remote start on the door.",
         "data": {
-          "name": "Name"
+          "name": "Name",
+          "api_key": "API key",
+          "access_token": "Access token",
+          "refresh_token": "Refresh token"
+        }
+      },
+      "pick": {
+        "title": "Choose dishwasher",
+        "description": "Several appliances are on this Electrolux account.",
+        "data": {
+          "appliance_id": "Appliance"
         }
       }
+    },
+    "error": {
+      "invalid_auth": "Electrolux rejected the API key or tokens. Generate new tokens on the developer portal.",
+      "cannot_connect": "Could not reach the Electrolux API.",
+      "no_appliances": "No appliances found. Pair the FSE73768P in My AEG Kitchen first."
     },
     "abort": {
       "already_configured": "This dishwasher is already configured"
@@ -97,14 +112,9 @@
       }
     },
     "switch": {
-      "power": { "name": "Power" },
-      "door_switch": { "name": "Door open" },
       "extra_power": { "name": "ExtraPower" },
       "glass_care": { "name": "GlassCare" },
-      "extra_silent": { "name": "ExtraSilent" },
-      "airdry": { "name": "AirDry" },
-      "end_sound": { "name": "End sound" },
-      "comfort_lift": { "name": "ComfortLift" }
+      "extra_silent": { "name": "ExtraSilent" }
     },
     "button": {
       "start": { "name": "Start" },
@@ -116,24 +126,16 @@
       "start_2h40": { "name": "Start 2h 40min" },
       "start_eco": { "name": "Start ECO" },
       "start_auto_sense": { "name": "Start AUTO Sense" },
-      "start_machine_care": { "name": "Start Machine Care" },
-      "refill_salt": { "name": "Refill salt" },
-      "refill_rinse_aid": { "name": "Refill rinse aid" },
-      "reset_machine_care": { "name": "Reset Machine Care" }
+      "start_machine_care": { "name": "Start Machine Care" }
     },
     "number": {
-      "delay_start": { "name": "Delay start" },
-      "water_softener": { "name": "Water softener" },
-      "rinse_aid_dosage": { "name": "Rinse aid dosage" }
-    },
-    "light": {
-      "interior_light": { "name": "Interior light" }
+      "delay_start": { "name": "Delay start" }
     }
   },
   "services": {
     "start_program": {
       "name": "Start programme",
-      "description": "Start a QuickSelect programme on the offline FSE73768P.",
+      "description": "Start a QuickSelect programme on the FSE73768P.",
       "fields": {
         "device_id": { "name": "Device", "description": "Leave empty if you only have one dishwasher." },
         "program": { "name": "Programme", "description": "QuickSelect programme to run." },
@@ -154,14 +156,6 @@
     "cancel": {
       "name": "Cancel",
       "description": "Cancel the current programme or delayed start."
-    },
-    "set_door": {
-      "name": "Set door",
-      "description": "Open or close the door on the simulated appliance.",
-      "fields": {
-        "device_id": { "name": "Device", "description": "Target dishwasher." },
-        "open": { "name": "Open", "description": "True to open, false to close." }
-      }
     }
   }
 }

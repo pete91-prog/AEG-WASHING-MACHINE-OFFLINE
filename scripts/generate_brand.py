@@ -67,7 +67,7 @@ def write_logo(path: Path, dark: bool) -> None:
     _dishwasher(gdraw, 256, fg)
     image.alpha_composite(glyph, (24, 0))
     draw.text((300, 78), "FSE73768P", fill=fg)
-    draw.text((300, 148), "7000 ComfortLift  ·  offline", fill=fg)
+    draw.text((300, 148), "7000 ComfortLift", fill=fg)
     path.parent.mkdir(parents=True, exist_ok=True)
     image.save(path, "PNG")
 
