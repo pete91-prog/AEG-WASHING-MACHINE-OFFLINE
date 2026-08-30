@@ -22,6 +22,7 @@ start_program:
             - eco
             - auto_sense
             - machine_care
+            - prewash
     extra_power:
       name: ExtraPower
       selector:

@@ -13,6 +13,8 @@ def test_program_from_uid() -> None:
     assert program_from_uid("QUICK30") == "quick"
     assert program_from_uid("AUTO") == "auto_sense"
     assert program_from_uid("MACHINE_CARE") == "machine_care"
+    assert program_from_uid("PREWASH") == "prewash"
+    assert program_from_uid("PRECAST") == "prewash"
 
 
 def test_apply_running_state() -> None:

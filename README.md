@@ -36,6 +36,7 @@ Values follow the 7000-series QuickSelect manuals. ECO is the Ecodesign (EU) 201
 | **ECO** | **240 min** | **11.0 L** | **0.86 kWh** | 50 °C | ExtraPower, GlassCare, ExtraSilent |
 | AUTO Sense | 145 min | 11.9 L | 0.99 kWh | 50–60 °C | — |
 | Machine Care | 60 min | 10.8 L | 0.67 kWh | 70 °C | — |
+| Prewash | 15 min | 4.0 L | 0.05 kWh | cold | — |
 
 ## Connect the dishwasher
 
@@ -49,7 +50,7 @@ Then in Home Assistant:
 1. HACS → Integrations → Custom repositories
 2. URL: `https://github.com/pete91-prog/AEG-WASHING-MACHINE-OFFLINE`
 3. Category: **Integration**
-4. Download **AEG FSE73768P** (1.1.0 or newer)
+4. Download **AEG FSE73768P** (1.1.1 or newer)
 5. Restart Home Assistant
 6. Settings → Devices & services → Add **AEG FSE73768P**
 7. Paste API key, access token, and refresh token
@@ -60,7 +61,7 @@ HACS does **not** refresh custom repositories immediately. Force it:
 
 1. **HACS** → **Integrations** → open **AEG FSE73768P**
 2. Top right **⋮** → **Update information** (or *Oppdater informasjon*)
-3. **⋮** → **Redownload** / **Download again** (*Last ned på nytt*) — pick **1.1.0** if it appears, otherwise **main**
+3. **⋮** → **Redownload** / **Download again** (*Last ned på nytt*) — pick **1.1.1** if it appears, otherwise **main**
 4. **Restart Home Assistant**
 5. Add the integration again and paste Electrolux tokens
 

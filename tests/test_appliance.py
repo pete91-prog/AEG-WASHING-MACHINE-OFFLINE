@@ -27,6 +27,7 @@ def test_all_programmes_are_present() -> None:
         "eco",
         "auto_sense",
         "machine_care",
+        "prewash",
     )
     for key in PROGRAM_ORDER:
         program = PROGRAMS[key]
@@ -98,6 +99,8 @@ def test_extra_silent_only_on_eco() -> None:
 def test_auto_sense_and_machine_care_have_no_extras() -> None:
     assert PROGRAMS["auto_sense"].extras == ()
     assert PROGRAMS["machine_care"].extras == ()
+    assert PROGRAMS["prewash"].extras == ()
+    assert PROGRAMS["prewash"].duration_min == 15
 
 
 def test_delay_start() -> None:
