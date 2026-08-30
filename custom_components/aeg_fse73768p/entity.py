@@ -25,7 +25,7 @@ class AEGEntity(CoordinatorEntity[AEGCoordinator]):
             model=MODEL,
             model_id=MODEL_ID,
             name=coordinator.appliance.name,
-            sw_version="1.1.0",
+            sw_version="1.1.1",
             hw_version="7000 ComfortLift",
             serial_number=MODEL_ID,
         )

@@ -227,6 +227,19 @@ PROGRAMS: Final[dict[str, Program]] = {
         ),
         description="Cleans limescale and grease from the tub. Do not load dishes.",
     ),
+    "prewash": _prog(
+        "prewash",
+        "Prewash",
+        15,
+        4.0,
+        0.05,
+        5,
+        "Food residue only",
+        "Crockery and cutlery",
+        (),
+        (Phase(PHASE_PREWASH, 15),),
+        description="Short rinse to clear food residue if you are not starting a full wash. Do not use detergent.",
+    ),
 }
 
 PROGRAM_ORDER: Final[tuple[str, ...]] = (
@@ -237,6 +250,7 @@ PROGRAM_ORDER: Final[tuple[str, ...]] = (
     "eco",
     "auto_sense",
     "machine_care",
+    "prewash",
 )
 
 EXTRA_LABELS: Final[dict[str, str]] = {

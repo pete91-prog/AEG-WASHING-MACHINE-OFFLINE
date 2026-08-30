@@ -52,7 +52,8 @@
           "2h40": "2h 40min",
           "eco": "ECO",
           "auto_sense": "AUTO Sense",
-          "machine_care": "Machine Care"
+          "machine_care": "Machine Care",
+          "prewash": "Prewash"
         }
       },
       "cycle_phase": {
@@ -107,7 +108,8 @@
           "2h40": "2h 40min",
           "eco": "ECO",
           "auto_sense": "AUTO Sense",
-          "machine_care": "Machine Care"
+          "machine_care": "Machine Care",
+          "prewash": "Prewash"
         }
       }
     },
@@ -126,7 +128,8 @@
       "start_2h40": { "name": "Start 2h 40min" },
       "start_eco": { "name": "Start ECO" },
       "start_auto_sense": { "name": "Start AUTO Sense" },
-      "start_machine_care": { "name": "Start Machine Care" }
+      "start_machine_care": { "name": "Start Machine Care" },
+      "start_prewash": { "name": "Start Prewash" }
     },
     "number": {
       "delay_start": { "name": "Delay start" }

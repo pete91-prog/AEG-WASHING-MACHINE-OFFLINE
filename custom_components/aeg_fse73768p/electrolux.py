@@ -33,6 +33,17 @@ PROGRAM_UID_CANDIDATES: dict[str, tuple[str, ...]] = {
     "eco": ("ECO", "ECO50", "ECO_50"),
     "auto_sense": ("AUTO", "AUTO_SENSE", "AUTOSENSE", "AUTO50_60"),
     "machine_care": ("MACHINE_CARE", "MACHINECARE", "MACHINECARE70"),
+    "prewash": (
+        "PREWASH",
+        "PRE_WASH",
+        "PRERINSE",
+        "PRE_RINSE",
+        "PRECAST",
+        "RINSEHOLD",
+        "RINSE_HOLD",
+        "RINSE_AND_HOLD",
+        "RINSE",
+    ),
 }
 
 EXTRA_UIDS: dict[str, tuple[str, ...]] = {
