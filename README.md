@@ -50,7 +50,7 @@ Then in Home Assistant:
 1. HACS → Integrations → Custom repositories
 2. URL: `https://github.com/pete91-prog/AEG-WASHING-MACHINE-OFFLINE`
 3. Category: **Integration**
-4. Download **AEG FSE73768P** (1.1.1 or newer)
+4. Download **AEG FSE73768P** (1.2.0 or newer)
 5. Restart Home Assistant
 6. Settings → Devices & services → Add **AEG FSE73768P**
 7. Paste API key, access token, and refresh token
@@ -61,7 +61,7 @@ HACS does **not** refresh custom repositories immediately. Force it:
 
 1. **HACS** → **Integrations** → open **AEG FSE73768P**
 2. Top right **⋮** → **Update information** (or *Oppdater informasjon*)
-3. **⋮** → **Redownload** / **Download again** (*Last ned på nytt*) — pick **1.1.1** if it appears, otherwise **main**
+3. **⋮** → **Redownload** / **Download again** (*Last ned på nytt*) — pick **1.2.0** if it appears, otherwise **main**
 4. **Restart Home Assistant**
 5. Add the integration again and paste Electrolux tokens
 
@@ -78,7 +78,8 @@ resources:
 The device exposes:
 
 - State, programme, cycle phase, remaining time, progress, temperatures, Ecometer, TimeBeam
-- Energy and water used this cycle
+- Energy this cycle, **total energy** (Energy dashboard), and cycle count
+- Water used this cycle
 - Running / door / salt / rinse aid / Machine Care binary sensors
 - Programme select plus **Start Quick**, **Start ECO**, … buttons
 - ExtraPower, GlassCare, ExtraSilent
@@ -115,6 +116,8 @@ The card behaves like a vehicle card in Home Assistant:
 AEG does not expose a local LAN API. Every command goes through the official Electrolux Group API after the dishwasher is paired in **My AEG Kitchen**. Enable **remote start** on the door or Electrolux will reject the command.
 
 The physical door cannot be opened from Home Assistant. ExtraPower / GlassCare / ExtraSilent are sent with the programme.
+
+**Total energy** is a lifetime kWh counter (`state_class: total_increasing`). Add `sensor.*_total_energy` under Settings → Dashboards → Energy → Individual devices. Cycle count increases when the dishwasher reports a finished cycle. Both values survive Home Assistant restarts.
 
 ## Development
 

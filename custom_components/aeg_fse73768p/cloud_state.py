@@ -53,8 +53,47 @@ def reported_state(payload: dict[str, Any]) -> dict[str, Any]:
     return reported if isinstance(reported, dict) else payload
 
 
+CYCLE_COUNT_KEYS = (
+    "cycleCount",
+    "numberOfCycles",
+    "totalCycles",
+    "cycles",
+    "numberOfCompletedCycles",
+    "washingCycles",
+)
+ENERGY_KEYS = (
+    "energyConsumption",
+    "totalEnergy",
+    "lifetimeEnergy",
+    "energyUsed",
+    "totalEnergyConsumption",
+    "energyWh",
+)
+
+
+def _optional_number(reported: dict[str, Any], names: tuple[str, ...]) -> float | None:
+    wanted = {name.lower() for name in names}
+    for key, value in reported.items():
+        if str(key).lower() not in wanted:
+            continue
+        try:
+            return float(value)
+        except (TypeError, ValueError):
+            continue
+    return None
+
+
+def _energy_kwh(value: float) -> float:
+    """Electrolux sometimes reports watt-hours."""
+    if value > 20:
+        return round(value / 1000, 3)
+    return round(value, 3)
+
+
 def apply_cloud_state(appliance: Appliance, payload: dict[str, Any]) -> None:
     """Overwrite local fields from a live Electrolux state document."""
+    previous = appliance.state
+    initialized = appliance._cloud_initialized
     reported = reported_state(payload)
     raw_state = str(reported.get("applianceState") or reported.get("status") or "IDLE").upper()
     appliance.state = STATE_FROM_CLOUD.get(raw_state, STATE_IDLE)
@@ -140,6 +179,28 @@ def apply_cloud_state(appliance: Appliance, payload: dict[str, Any]) -> None:
     remote = str(reported.get("remoteControl") or "")
     if remote.upper() in {"DISABLED", "TEMPORARY_LOCKED"}:
         appliance.last_error = "Enable remote start on the dishwasher door"
+
+    cloud_cycles = _optional_number(reported, CYCLE_COUNT_KEYS)
+    bumped_from_cloud = False
+    if cloud_cycles is not None and int(cloud_cycles) > appliance.cycle_count:
+        appliance.cycle_count = int(cloud_cycles)
+        bumped_from_cloud = True
+
+    cloud_energy = _optional_number(reported, ENERGY_KEYS)
+    if cloud_energy is not None:
+        kwh = _energy_kwh(cloud_energy)
+        if kwh > appliance.total_energy_kwh:
+            appliance.total_energy_kwh = kwh
+
+    if (
+        initialized
+        and appliance.state == STATE_COMPLETE
+        and previous != STATE_COMPLETE
+        and not bumped_from_cloud
+    ):
+        appliance.record_finished_cycle()
+
+    appliance._cloud_initialized = True
     appliance._touch()
 
 

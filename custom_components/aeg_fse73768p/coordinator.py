@@ -10,6 +10,7 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.exceptions import ConfigEntryAuthFailed
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
+from homeassistant.helpers.storage import Store
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 
 from .appliance import (
@@ -42,6 +43,7 @@ class AEGCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         entry: ConfigEntry,
         appliance: Appliance,
         client: ElectroluxAPI,
+        store: Store,
     ) -> None:
         super().__init__(
             hass,
@@ -54,13 +56,20 @@ class AEGCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         self.appliance = appliance
         self.client = client
         self.appliance_id = str(entry.data[CONF_APPLIANCE_ID])
+        self._store = store
 
     async def async_setup(self) -> None:
         await self.client.load_program_map(self.appliance_id)
 
+    async def async_save(self) -> None:
+        await self._store.async_save(self.appliance.to_storage())
+
     async def _async_update_data(self) -> dict[str, Any]:
         payload = await self.client.get_state(self.appliance_id)
+        before = (self.appliance.cycle_count, self.appliance.total_energy_kwh)
         apply_cloud_state(self.appliance, payload)
+        if (self.appliance.cycle_count, self.appliance.total_energy_kwh) != before:
+            await self.async_save()
         return self.appliance.snapshot()
 
     async def async_push(self) -> None:

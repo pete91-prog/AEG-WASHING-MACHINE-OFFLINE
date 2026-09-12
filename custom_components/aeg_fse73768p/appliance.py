@@ -70,12 +70,14 @@ class Appliance:
     interior_light_on: bool = False
     cycle_count: int = 0
     cycles_since_care: int = 0
+    total_energy_kwh: float = 0.0
     last_error: str | None = None
     started_at: float | None = None
     updated_at: float = field(default_factory=time.time)
     _cycle: ResolvedCycle | None = field(default=None, repr=False)
     _last_tick: float = field(default_factory=time.time, repr=False)
     _idle_since: float = field(default_factory=time.time, repr=False)
+    _cloud_initialized: bool = field(default=False, repr=False)
 
     # ------------------------------------------------------------------
     # Derived
@@ -135,6 +137,17 @@ class Appliance:
 
     def energy_used_kwh(self) -> float:
         return round(self.cycle.energy_kwh * (self.progress / 100), 3)
+
+    def record_finished_cycle(self, energy_kwh: float | None = None) -> None:
+        """Count a completed wash and add its energy to the lifetime total."""
+        self.cycle_count += 1
+        added = self.cycle.energy_kwh if energy_kwh is None else energy_kwh
+        self.total_energy_kwh = round(self.total_energy_kwh + max(0.0, float(added)), 3)
+        if self.program_id == "machine_care":
+            self.cycles_since_care = 0
+        else:
+            self.cycles_since_care += 1
+        self._touch()
 
     def water_used_l(self) -> float:
         return round(self.cycle.water_l * (self.progress / 100), 2)
@@ -332,11 +345,7 @@ class Appliance:
         self.state = STATE_COMPLETE
         self.phase = "complete"
         self.elapsed_seconds = self.cycle.duration_min * 60
-        self.cycle_count += 1
-        if self.program_id == "machine_care":
-            self.cycles_since_care = 0
-        else:
-            self.cycles_since_care += 1
+        self.record_finished_cycle()
         if self.airdry_enabled:
             self.door_open = True
             self.interior_light_on = True
@@ -396,6 +405,7 @@ class Appliance:
             "noise_db": cycle.noise_db,
             "energy_kwh": cycle.energy_kwh,
             "energy_used_kwh": self.energy_used_kwh(),
+            "total_energy_kwh": self.total_energy_kwh,
             "water_l": cycle.water_l,
             "water_used_l": self.water_used_l(),
             "salt_ok": self.salt_ok,
@@ -451,6 +461,7 @@ class Appliance:
             "key_tones": self.key_tones,
             "cycle_count": self.cycle_count,
             "cycles_since_care": self.cycles_since_care,
+            "total_energy_kwh": self.total_energy_kwh,
         }
 
     def restore(self, data: dict[str, Any]) -> None:
@@ -469,6 +480,7 @@ class Appliance:
         self.key_tones = data.get("key_tones", True)
         self.cycle_count = int(data.get("cycle_count", 0))
         self.cycles_since_care = int(data.get("cycles_since_care", 0))
+        self.total_energy_kwh = float(data.get("total_energy_kwh", 0.0))
         self.state = STATE_IDLE if self.powered else STATE_OFF
         self.phase = "idle"
         self._cycle = None

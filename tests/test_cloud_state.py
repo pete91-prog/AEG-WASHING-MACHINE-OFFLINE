@@ -57,6 +57,58 @@ def test_apply_finished_and_salt_alert() -> None:
     assert machine.state == STATE_COMPLETE
     assert machine.door_open is True
     assert machine.salt_ok is False
+    # First poll while already finished must not invent a cycle.
+    assert machine.cycle_count == 0
+    assert machine.total_energy_kwh == 0.0
+
+
+def test_finished_cycle_increments_count_and_energy() -> None:
+    machine = Appliance()
+    apply_cloud_state(
+        machine,
+        {
+            "properties": {
+                "reported": {
+                    "applianceState": "RUNNING",
+                    "userSelections": {"programUID": "QUICK30"},
+                }
+            }
+        },
+    )
+    apply_cloud_state(
+        machine,
+        {
+            "properties": {
+                "reported": {
+                    "applianceState": "END_OF_CYCLE",
+                    "userSelections": {"programUID": "QUICK30"},
+                }
+            }
+        },
+    )
+    assert machine.cycle_count == 1
+    assert machine.total_energy_kwh == machine.cycle.energy_kwh
+    apply_cloud_state(
+        machine,
+        {
+            "properties": {
+                "reported": {
+                    "applianceState": "END_OF_CYCLE",
+                    "userSelections": {"programUID": "QUICK30"},
+                }
+            }
+        },
+    )
+    assert machine.cycle_count == 1
+
+
+def test_cloud_cycle_count_wins_when_higher() -> None:
+    machine = Appliance()
+    apply_cloud_state(
+        machine,
+        {"reported": {"applianceState": "IDLE", "cycleCount": 12}},
+    )
+    assert machine.cycle_count == 12
 
 
 def test_list_dishwashers_filters_dw() -> None:

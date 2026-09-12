@@ -9,10 +9,11 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant, ServiceCall
 from homeassistant.exceptions import HomeAssistantError, ServiceValidationError
 from homeassistant.helpers import config_validation as cv, device_registry as dr
+from homeassistant.helpers.storage import Store
 from homeassistant.helpers.typing import ConfigType
 
 from .appliance import Appliance, ApplianceError
-from .const import CONF_NAME, DEFAULT_NAME, DOMAIN, PLATFORMS
+from .const import CONF_NAME, DEFAULT_NAME, DOMAIN, PLATFORMS, STORAGE_VERSION
 from .coordinator import AEGCoordinator, create_cloud_client
 from .programs import PROGRAMS
 
@@ -48,9 +49,12 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up the real dishwasher via the Electrolux API."""
     hass.data.setdefault(DOMAIN, {})
+    store = Store(hass, STORAGE_VERSION, f"{DOMAIN}.{entry.entry_id}")
+    stored = await store.async_load() or {}
     appliance = Appliance(name=entry.data.get(CONF_NAME, DEFAULT_NAME))
+    appliance.restore(stored)
     client = create_cloud_client(hass, entry)
-    coordinator = AEGCoordinator(hass, entry, appliance, client)
+    coordinator = AEGCoordinator(hass, entry, appliance, client, store)
     await coordinator.async_setup()
     await coordinator.async_config_entry_first_refresh()
     hass.data[DOMAIN][entry.entry_id] = coordinator
@@ -73,7 +77,9 @@ async def async_migrate_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Unload a config entry."""
     unload_ok = await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
-    hass.data[DOMAIN].pop(entry.entry_id, None)
+    coordinator: AEGCoordinator | None = hass.data[DOMAIN].pop(entry.entry_id, None)
+    if coordinator:
+        await coordinator.async_save()
     return unload_ok
 
 
