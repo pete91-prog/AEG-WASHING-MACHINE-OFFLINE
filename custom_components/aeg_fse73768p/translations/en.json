@@ -86,6 +86,7 @@
         }
       },
       "estimated_energy": { "name": "Energy this cycle" },
+      "total_energy": { "name": "Total energy" },
       "estimated_water": { "name": "Water this cycle" },
       "cycle_count": { "name": "Cycle count" },
       "noise": { "name": "Noise" }

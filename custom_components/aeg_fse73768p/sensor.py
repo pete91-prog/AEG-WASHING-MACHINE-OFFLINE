@@ -119,6 +119,16 @@ SENSORS: tuple[AEGSensorDescription, ...] = (
         value_fn=lambda a: a.energy_used_kwh(),
     ),
     AEGSensorDescription(
+        key="total_energy",
+        translation_key="total_energy",
+        icon="mdi:lightning-bolt",
+        device_class=SensorDeviceClass.ENERGY,
+        state_class=SensorStateClass.TOTAL_INCREASING,
+        native_unit_of_measurement=UnitOfEnergy.KILO_WATT_HOUR,
+        suggested_display_precision=3,
+        value_fn=lambda a: a.total_energy_kwh,
+    ),
+    AEGSensorDescription(
         key="estimated_water",
         translation_key="estimated_water",
         icon="mdi:water",

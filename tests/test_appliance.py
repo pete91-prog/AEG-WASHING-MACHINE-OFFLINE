@@ -60,6 +60,7 @@ def test_quick_start_and_progress() -> None:
     machine.tick(machine._last_tick + 12 * 60)
     assert machine.state == STATE_COMPLETE
     assert machine.cycle_count == 1
+    assert machine.total_energy_kwh == PROGRAMS["quick"].energy_kwh
     assert machine.remaining_seconds == 0
 
 
