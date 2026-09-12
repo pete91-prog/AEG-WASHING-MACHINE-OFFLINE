@@ -61,7 +61,7 @@ HACS does **not** refresh custom repositories immediately. Force it:
 
 1. **HACS** → **Integrations** → open **AEG FSE73768P**
 2. Top right **⋮** → **Update information** (or *Oppdater informasjon*)
-3. **⋮** → **Redownload** / **Download again** (*Last ned på nytt*) — pick **1.2.0** if it appears, otherwise **main**
+3. **⋮** → **Redownload** / **Download again** (*Last ned på nytt*) — pick **1.2.1** if it appears, otherwise **main**
 4. **Restart Home Assistant**
 5. Add the integration again and paste Electrolux tokens
 
