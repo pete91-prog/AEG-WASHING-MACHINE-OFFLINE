@@ -50,7 +50,7 @@ Then in Home Assistant:
 1. HACS → Integrations → Custom repositories
 2. URL: `https://github.com/pete91-prog/AEG-WASHING-MACHINE-OFFLINE`
 3. Category: **Integration**
-4. Download **AEG FSE73768P** (1.2.0 or newer)
+4. Download **AEG FSE73768P** (1.2.1 or newer)
 5. Restart Home Assistant
 6. Settings → Devices & services → Add **AEG FSE73768P**
 7. Paste API key, access token, and refresh token

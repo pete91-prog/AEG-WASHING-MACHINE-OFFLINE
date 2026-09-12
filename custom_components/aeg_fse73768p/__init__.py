@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import logging
+from typing import Any
+
 import voluptuous as vol
 
 from homeassistant.config_entries import ConfigEntry
@@ -40,6 +42,18 @@ START_SCHEMA = vol.Schema(
 DEVICE_SCHEMA = vol.Schema({vol.Optional("device_id"): cv.string})
 
 
+class AEGStore(Store):
+    """Load older store files after STORAGE_VERSION bumps."""
+
+    async def _async_migrate_func(
+        self,
+        old_major_version: int,
+        old_minor_version: int,
+        old_data: dict[str, Any] | None,
+    ) -> dict[str, Any]:
+        return old_data or {}
+
+
 async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
     """Set up the integration (config-entry only)."""
     hass.data.setdefault(DOMAIN, {})
@@ -49,7 +63,7 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up the real dishwasher via the Electrolux API."""
     hass.data.setdefault(DOMAIN, {})
-    store = Store(hass, STORAGE_VERSION, f"{DOMAIN}.{entry.entry_id}")
+    store = AEGStore(hass, STORAGE_VERSION, f"{DOMAIN}.{entry.entry_id}")
     stored = await store.async_load() or {}
     appliance = Appliance(name=entry.data.get(CONF_NAME, DEFAULT_NAME))
     appliance.restore(stored)
